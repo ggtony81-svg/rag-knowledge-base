@@ -113,6 +113,9 @@ def run_agent(user_input):
         return
 
     # 模型决定要调工具
+    # 先把模型的 tool_calls 消息加到对话里（只加一次）
+    messages.append(msg)
+
     for tool_call in msg["tool_calls"]:
         func_name = tool_call["function"]["name"]
         args = json.loads(tool_call["function"]["arguments"])
@@ -131,8 +134,7 @@ def run_agent(user_input):
         print(f"   结果：{result}")
         print()
 
-        # 把工具调用的结果发给模型
-        messages.append(msg)
+        # 每个工具调用的结果分别加进去
         messages.append({
             "role": "tool",
             "tool_call_id": tool_call["id"],
