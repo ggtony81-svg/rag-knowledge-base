@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>流式输出测试</title>
+    <style>
+        body { font-family: sans-serif; max-width: 700px; margin: 40px auto; padding: 0 20px; background: #1a1a2e; color: #eee; }
+        h1 { color: #e94560; }
+        .input-area { margin: 20px 0; }
+        input { width: 70%; padding: 10px; font-size: 16px; background: #16213e; border: 1px solid #0f3460; color: #eee; border-radius: 4px; }
+        button { padding: 10px 20px; font-size: 16px; background: #e94560; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #c23152; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .output-box { background: #16213e; border: 1px solid #0f3460; border-radius: 8px; padding: 20px; min-height: 150px; margin-top: 20px; line-height: 1.6; font-size: 16px; white-space: pre-wrap; }
+        .cursor { animation: blink 0.8s infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+        .status { color: #888; font-size: 14px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>流式输出测试</h1>
+    <div class="input-area">
+        <input type="text" id="question" value="加班有没有钱拿" placeholder="输入问题..." />
+        <button id="btn" onclick="testStream()">发送</button>
+    </div>
+    <div class="output-box" id="output">等待提问...</div>
+    <div class="status" id="status"></div>
+
+    <script>
+        async function testStream() {
+            const question = document.getElementById('question').value;
+            const output = document.getElementById('output');
+            const status = document.getElementById('status');
+            const btn = document.getElementById('btn');
+
+            output.textContent = '';
+            status.textContent = '连接中...';
+            btn.disabled = true;
+
+            try {
+                const response = await fetch('http://127.0.0.1:18001/ask/stream', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question })
+                });
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let text = '';
+                status.textContent = '接收中...';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) {
+                        status.textContent = '完成';
+                        btn.disabled = false;
+                        break;
+                    }
+                    text += decoder.decode(value, { stream: true });
+                    output.textContent = text;
+                }
+            } catch (err) {
+                output.textContent = '连接失败，确保服务已启动 (python rag_agent_stream.py)';
+                status.textContent = '错误';
+                btn.disabled = false;
+            }
+        }
+
+        // 页面加载后自动发送
+        window.onload = () => setTimeout(testStream, 500);
+    </script>
+</body>
+</html>
