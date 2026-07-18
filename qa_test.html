@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>PDF 知识库问答</title>
+    <style>
+        body { font-family: sans-serif; max-width: 700px; margin: 40px auto; padding: 20px; background: #1a1a2e; color: #eee; }
+        h1 { color: #e94560; }
+        .step { background: #16213e; border: 1px solid #0f3460; border-radius: 8px; padding: 15px; margin: 15px 0; }
+        .step h3 { margin: 0 0 10px 0; color: #0f3460; }
+        input[type="file"] { color: #eee; }
+        input[type="text"] { width: 70%; padding: 10px; background: #1a1a2e; border: 1px solid #0f3460; color: #eee; border-radius: 4px; }
+        button { padding: 10px 20px; background: #e94560; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #c23152; }
+        button:disabled { opacity: 0.5; }
+        .output-box { background: #16213e; border: 1px solid #0f3460; border-radius: 8px; padding: 20px; min-height: 100px; margin-top: 10px; line-height: 1.6; white-space: pre-wrap; }
+        .status { color: #888; font-size: 14px; }
+        .chunks-info { color: #0f3460; font-size: 13px; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <h1>PDF 知识库问答</h1>
+
+    <div class="step">
+        <h3>第一步：上传 PDF</h3>
+        <input type="file" id="fileInput" accept=".pdf">
+        <button id="uploadBtn" onclick="uploadPDF()">上传</button>
+        <div class="status" id="uploadStatus"></div>
+        <div class="chunks-info" id="chunksInfo"></div>
+    </div>
+
+    <div class="step">
+        <h3>第二步：提问</h3>
+        <input type="text" id="question" value="请假怎么请" style="width:60%">
+        <button id="askBtn" onclick="askQuestion()" disabled>提问</button>
+        <div class="output-box" id="output">等待上传 PDF...</div>
+        <div class="status" id="askStatus"></div>
+    </div>
+
+    <script>
+        const API = 'http://127.0.0.1:18003';
+
+        async function uploadPDF() {
+            const file = document.getElementById('fileInput').files[0];
+            if (!file) return alert('请选择 PDF 文件');
+            document.getElementById('uploadStatus').textContent = '上传中...';
+            document.getElementById('uploadBtn').disabled = true;
+
+            const form = new FormData();
+            form.append('file', file);
+
+            try {
+                const resp = await fetch(`${API}/upload`, { method: 'POST', body: form });
+                const data = await resp.json();
+                document.getElementById('uploadStatus').textContent = '上传成功 ✅';
+                document.getElementById('chunksInfo').textContent = `${data.pages} 页 · ${data.chunks} 个知识块 · ${data.total_chars} 字符`;
+                document.getElementById('askBtn').disabled = false;
+                document.getElementById('output').textContent = '知识库已就绪，请输入问题';
+            } catch (e) {
+                document.getElementById('uploadStatus').textContent = '上传失败: ' + e.message;
+                document.getElementById('uploadBtn').disabled = false;
+            }
+        }
+
+        async function askQuestion() {
+            const question = document.getElementById('question').value;
+            const output = document.getElementById('output');
+            const status = document.getElementById('askStatus');
+            document.getElementById('askBtn').disabled = true;
+
+            output.textContent = '';
+            status.textContent = '连接中...';
+
+            try {
+                const resp = await fetch(`${API}/ask/stream`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question })
+                });
+
+                const reader = resp.body.getReader();
+                const decoder = new TextDecoder();
+                let text = '';
+                status.textContent = '流式接收中...';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) { status.textContent = '完成 ✅'; break; }
+                    text += decoder.decode(value, { stream: true });
+                    output.textContent = text;
+                }
+            } catch (e) {
+                output.textContent = '连接失败，确保服务已启动 (python pdf_qa.py)';
+                status.textContent = '错误 ❌';
+            }
+            document.getElementById('askBtn').disabled = false;
+        }
+    </script>
+</body>
+</html>
