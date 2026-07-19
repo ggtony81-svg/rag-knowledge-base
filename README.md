@@ -2,7 +2,7 @@
 
 > 这不是一次性做出来的产品，**而是一步一步"学"出来的作品**。
 >
-> 从完全不会 AI 开发，到做出一个带 RAG + Agent + 流式输出 + PDF 解析的完整问答系统，这个仓库记录了我完整的成长轨迹。
+> 从完全不会 AI 开发，到做出一个带 RAG + Agent + 流式输出 + PDF 解析 + MySQL + Redis 缓存的完整问答系统，这个仓库记录了我完整的成长轨迹。
 
 ---
 
@@ -24,6 +24,9 @@ v4 → 流式输出（我学会了：SSE、流式响应）
  │    ↘ 发现问题：知识库是写死在代码里的，不够灵活
  ▼
 v5 → PDF 知识库问答（我学会了：PDF解析、文件上传、完整产品闭环）
+ │    ↘ 发现问题：服务重启数据就没了，相同问题反复调API费钱
+ ▼
+v6 → MySQL + Redis 持久化与缓存（我学会了：数据库、缓存加速）
 ```
 
 ---
@@ -94,11 +97,25 @@ v2 只能查知识库，我想让模型能干更多事——查天气、算数�
 
 ---
 
+### v6 — 给项目装上"记忆和缓存"（工程化）
+
+**关键词：** `pdf_qa_db.py`、`pdf_qa_redis.py`
+
+产品做完了，但遇到两个实际问题：
+- **服务重启，聊天记录全丢了** → 学了 MySQL，把问答历史持久化存储
+- **相同问题反复调 API，费钱又慢** → 学了 Redis，相同问题从缓存秒回
+
+**效果：** 首次提问 3-5 秒，缓存后 0.0 秒。用 `cache_test.html` 做对比测试，数据说话。
+
+---
+
 > 每一个版本我都写了对应的原理 demo 文件，方便后来者理解：
 > - `vector_vs_keyword.py` — 向量搜索 vs 关键词搜索对比
 > - `agent_demo.py` — Agent 功能调用是怎么工作的
 > - `stream_demo.py` — 流式输出背后的机制
 > - `pdf_parser_demo.py` — PDF 是怎么被解析成文字的
+> - `mysql_demo.py` — MySQL 建表、存数据、查数据实操
+> - `redis_demo.py` — Redis 缓存原理与命中效果演示
 
 ---
 
@@ -110,7 +127,9 @@ rag-knowledge-base/
 ├── rag_api_v2.py             # v2: 向量搜索 RAG
 ├── rag_agent.py              # v3: RAG + Agent 工具调用
 ├── rag_agent_stream.py       # v4: 流式输出版
-├── pdf_qa.py                 # v5: PDF 知识库问答系统（集大成）
+├── pdf_qa.py                 # v5: PDF 知识库问答系统
+├── pdf_qa_db.py              # v6: PDF 问答 + MySQL 记录存储
+├── pdf_qa_redis.py           # v6: PDF 问答 + MySQL + Redis 缓存
 │
 ├── agent_demo.py             # Agent 基础原理 demo
 ├── stream_demo.py            # 流式输出原理 demo
@@ -118,9 +137,12 @@ rag-knowledge-base/
 ├── pdf_parser_demo.py        # PDF 解析分块 demo
 ├── pdf_pipeline_demo.py      # PDF 全流程可视化 demo
 ├── upload_demo.py            # 文件上传 demo
+├── redis_demo.py             # Redis 缓存原理 demo
+├── mysql_demo.py             # MySQL 基础操作 demo
 │
 ├── qa_test.html              # 前端测试页面
 ├── stream_test.html          # 流式测试页面
+├── cache_test.html           # 缓存效果测试页面
 │
 ├── config.py                 # API Key 配置（不提交 Git）
 ├── config.example.py         # 配置模板
@@ -132,27 +154,27 @@ rag-knowledge-base/
 
 ---
 
-## 架构图（最终版 v5）
+## 架构图（最终版 v6）
 
 ```
 用户 POST /ask {"question": "年假怎么请？"}
         │
         ▼
 ┌──────────────────────────────────────────────┐
-│  pdf_qa.py（FastAPI 服务端）                   │
+│  服务端                                        │
 │                                               │
-│  ① Agent 判断 → 用哪个工具                    │
-│  ② 向量检索 → 召回 Top-3 相关文档             │
-│  ③ 文档 + 问题 拼接成 Prompt                  │
-│  ④ 调 DeepSeek API 流式生成回答               │
-│  ⑤ StreamingResponse 逐字返回                 │
+│  ① 查 Redis 缓存 → 有就直接秒回               │
+│  ② 无缓存 → 向量检索召回 Top-3 相关文档       │
+│  ③ 调 DeepSeek API 流式生成回答               │
+│  ④ StreamingResponse 逐字返回                 │
+│  ⑤ 存 MySQL 聊天记录 + 存 Redis 下次秒回       │
 └──────────────────────────────────────────────┘
         │
         ▼
       "根据公司制度，年假需提前3个工作日通过OA系统申请..."
 
-（这个架构不是一开始就有的——v1 只有 ①②③④中的一小部分，
-  每升一个版本才加上一块，v5 集大成。）
+（这个架构不是一开始就有的——v1 只有①②③④中的一小部分，
+  每升一个版本才加上一块，v6 集大成。）
 ```
 
 ---
@@ -169,6 +191,7 @@ rag-knowledge-base/
 | **Agent 工具调用** | DeepSeek Function Calling | v3 |
 | **流式输出** | Server-Sent Events（SSE） | v4 |
 | **PDF 解析** | PyMuPDF | v5 |
+| **数据库** | MySQL（PyMySQL） + Redis | v6 |
 | **API 文档** | Swagger UI（自动生成） | v1 |
 
 ---
