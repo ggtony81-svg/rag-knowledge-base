@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>缓存效果测试</title>
+    <style>
+        body { font-family: sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; background: #1a1a2e; color: #eee; }
+        h1 { color: #e94560; }
+        .step { background: #16213e; border: 1px solid #0f3460; border-radius: 8px; padding: 15px; margin: 15px 0; }
+        input[type="file"] { color: #eee; }
+        input[type="text"] { width: 60%; padding: 10px; background: #1a1a2e; border: 1px solid #0f3460; color: #eee; border-radius: 4px; }
+        button { padding: 10px 20px; background: #e94560; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #c23152; }
+        button:disabled { opacity: 0.5; }
+        .output-box { background: #16213e; border: 1px solid #0f3460; border-radius: 8px; padding: 15px; min-height: 80px; margin: 10px 0; line-height: 1.6; white-space: pre-wrap; font-size: 15px; }
+        .timer { color: #e94560; font-size: 18px; font-weight: bold; }
+        .hit { color: #4caf50; font-weight: bold; }
+        .miss { color: #ff9800; font-weight: bold; }
+        .record { border-bottom: 1px solid #333; padding: 8px 0; display: flex; justify-content: space-between; }
+        .record .q { color: #aaa; }
+        .record .time { color: #e94560; }
+        .record .cache-hit { color: #4caf50; }
+        .record .cache-miss { color: #ff9800; }
+    </style>
+</head>
+<body>
+    <h1>缓存效果对比测试</h1>
+
+    <div class="step">
+        <h3>第一步：上传 PDF</h3>
+        <input type="file" id="fileInput" accept=".pdf">
+        <button id="uploadBtn" onclick="uploadPDF()">上传</button>
+        <span id="uploadStatus"></span>
+    </div>
+
+    <div class="step">
+        <h3>第二步：提问（相同的问两遍，对比速度）</h3>
+        <input type="text" id="question" value="请假怎么请" style="width:55%">
+        <button id="askBtn" onclick="askQuestion()" disabled>提问</button>
+        <div class="output-box" id="output">等待上传 PDF...</div>
+        <div id="timer" class="timer">⏱ 0.0s</div>
+        <div id="cacheStatus"></div>
+        <button id="askAgainBtn" onclick="askAgain()" style="margin-top:10px;display:none">再问一次（测试缓存）</button>
+    </div>
+
+    <div class="step">
+        <h3>测试记录</h3>
+        <div id="records">
+            <div style="color:#666; font-size:14px;">还没有测试记录</div>
+        </div>
+    </div>
+
+    <script>
+        const API = 'http://127.0.0.1:18004';
+        let lastQuestion = '';
+        let recordCount = 0;
+
+        async function uploadPDF() {
+            const file = document.getElementById('fileInput').files[0];
+            if (!file) return alert('请选一个 PDF');
+            document.getElementById('uploadStatus').textContent = '上传中...';
+            document.getElementById('uploadBtn').disabled = true;
+            const form = new FormData();
+            form.append('file', file);
+            try {
+                const resp = await fetch(`${API}/upload`, { method: 'POST', body: form });
+                const data = await resp.json();
+                document.getElementById('uploadStatus').textContent = `✅ ${data.chunks} 个知识块`;
+                document.getElementById('askBtn').disabled = false;
+                document.getElementById('output').textContent = '知识库已就绪';
+            } catch(e) {
+                document.getElementById('uploadStatus').textContent = '❌ 失败';
+                document.getElementById('uploadBtn').disabled = false;
+            }
+        }
+
+        async function askQuestion() {
+            lastQuestion = document.getElementById('question').value;
+            await doAsk(lastQuestion, false);
+            document.getElementById('askAgainBtn').style.display = 'inline-block';
+        }
+
+        async function askAgain() {
+            await doAsk(lastQuestion, true);
+        }
+
+        async function doAsk(question, isRetry) {
+            const output = document.getElementById('output');
+            const timer = document.getElementById('timer');
+            const cacheStatus = document.getElementById('cacheStatus');
+            document.getElementById('askBtn').disabled = true;
+            document.getElementById('askAgainBtn').style.display = 'none';
+
+            output.textContent = '';
+            const startTime = Date.now();
+            timer.textContent = '⏱ 连接中...';
+            cacheStatus.textContent = '';
+
+            try {
+                const resp = await fetch(`${API}/ask/stream`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({question})
+                });
+
+                const reader = resp.body.getReader();
+                const decoder = new TextDecoder();
+                let text = '';
+                let firstChunk = true;
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    if (firstChunk && value) {
+                        const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+                        timer.textContent = `⏱ ${elapsed}s（首个字到达）`;
+                        firstChunk = false;
+                    }
+                    text += decoder.decode(value, { stream: true });
+                    output.textContent = text;
+                }
+
+                const totalTime = ((Date.now() - startTime) / 1000).toFixed(1);
+                const isFast = totalTime < 1;
+                timer.textContent = `⏱ ${totalTime}s（完整回答）`;
+                cacheStatus.textContent = isFast ? '✅ 缓存命中！秒回' : '⏳ 缓存未命中（调模型较慢）';
+                cacheStatus.className = isFast ? 'hit' : 'miss';
+
+                // 记录
+                recordCount++;
+                const records = document.getElementById('records');
+                if (recordCount === 1) records.innerHTML = '';
+                const record = document.createElement('div');
+                record.className = 'record';
+                record.innerHTML = `
+                    <span class="q">#${recordCount}: ${question.substring(0,15)}</span>
+                    <span class="${isFast ? 'cache-hit' : 'cache-miss'}">${totalTime}s ${isFast ? '✅缓存' : '⏳调模型'}</span>
+                `;
+                records.prepend(record);
+
+            } catch(e) {
+                output.textContent = '连接失败';
+                timer.textContent = '⏱ 错误';
+            }
+
+            document.getElementById('askBtn').disabled = false;
+            if (isRetry) document.getElementById('askAgainBtn').style.display = 'inline-block';
+        }
+    </script>
+</body>
+</html>
