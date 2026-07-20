@@ -27,6 +27,9 @@ v5 → PDF 知识库问答（我学会了：PDF解析、文件上传、完整产
  │    ↘ 发现问题：服务重启数据就没了，相同问题反复调API费钱
  ▼
 v6 → MySQL + Redis 持久化与缓存（我学会了：数据库、缓存加速）
+ │    ↘ 发现问题：检索不够精准，相似内容会干扰
+ ▼
+v7 → RAG 优化：语义分块 + 重排序（我学会了：MMR 多样性重排序、CrossEncoder 精排）
 ```
 
 ---
@@ -130,6 +133,8 @@ rag-knowledge-base/
 ├── pdf_qa.py                 # v5: PDF 知识库问答系统
 ├── pdf_qa_db.py              # v6: PDF 问答 + MySQL 记录存储
 ├── pdf_qa_redis.py           # v6: PDF 问答 + MySQL + Redis 缓存
+├── pdf_qa_optimized.py       # v7: RAG 优化版（语义分块 + CrossEncoder 重排序）
+│
 │
 ├── agent_demo.py             # Agent 基础原理 demo
 ├── stream_demo.py            # 流式输出原理 demo
@@ -139,6 +144,8 @@ rag-knowledge-base/
 ├── upload_demo.py            # 文件上传 demo
 ├── redis_demo.py             # Redis 缓存原理 demo
 ├── mysql_demo.py             # MySQL 基础操作 demo
+├── rag_optimize.py           # RAG 优化原理 demo
+├── compare_rag.py            # 优化前后对比测试
 │
 ├── qa_test.html              # 前端测试页面
 ├── stream_test.html          # 流式测试页面
@@ -192,6 +199,7 @@ rag-knowledge-base/
 | **流式输出** | Server-Sent Events（SSE） | v4 |
 | **PDF 解析** | PyMuPDF | v5 |
 | **数据库** | MySQL（PyMySQL） + Redis | v6 |
+| **重排序** | BAAI/bge-reranker-base CrossEncoder | v7 |
 | **API 文档** | Swagger UI（自动生成） | v1 |
 
 ---
