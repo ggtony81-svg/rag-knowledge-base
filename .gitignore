@@ -1,3 +1,6 @@
+# 注意：.gitignore 的注释必须独占一行。
+# 写在模式后面（如 "redis/  # 说明"）不会被当注释，整行会被当成一个模式，规则就失效了。
+
 # API Key 配置文件（不要提交到 GitHub）
 config.py
 
@@ -20,3 +23,30 @@ Thumbs.db
 
 # 向量数据库缓存（如果使用了 Chroma 持久化）
 chroma_data/
+
+# ---- 本地运行产物：本机需要，但仓库里不该有 ----
+# Redis 二进制和安装包，29MB，装一次就有
+redis/
+Logs/
+uploads/
+# 上传 PDF 后生成的向量库，换模型就得重建
+knowledge_base/
+*.rdb
+dump.rdb
+EventLog.dll
+# 早期拖进来但 README 从未引用的截图
+image/
+
+# ---- 大文件：可重新生成或重新下载 ----
+# 简历、笔记导出的 PDF；测试手册用 generate_test_pdf.py 重新生成
+*.pdf
+# 向量矩阵，跑一次 eval 就有
+*.npy
+# 微调模型权重 93MB + 向量缓存
+eval/cache/
+# CMRC2018 数据集 5.7MB，用 eval/download_data.py 下载
+eval/data/
+
+# ---- 个人资料：绝不提交 ----
+# 简历、证件照、投递记录
+踢出/

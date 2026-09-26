@@ -1,0 +1,27 @@
+{
+  "dataset": {
+    "corpus_size": 934,
+    "corpus_raw": 1149,
+    "query_count": 50
+  },
+  "results": {
+    "bm25": {
+      "label": "方案A BM25关键词",
+      "metrics": {
+        "Recall@1": 0.96,
+        "Recall@3": 1.0,
+        "Recall@5": 1.0,
+        "Recall@10": 1.0,
+        "MRR@10": 0.98,
+        "nDCG@10": 0.9852371901428583,
+        "P@1": 0.96,
+        "_queries": 50
+      },
+      "timing": {
+        "index_sec": 2.46,
+        "search_ms_mean": 1.81,
+        "search_ms_p95": 4.29
+      }
+    }
+  }
+}

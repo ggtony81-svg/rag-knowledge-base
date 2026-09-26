@@ -1,0 +1,47 @@
+{
+  "config": {
+    "limit": 2,
+    "seed": 42,
+    "topk": 3,
+    "retriever": "BM25",
+    "model": "deepseek-chat"
+  },
+  "summary": {
+    "n": 2,
+    "n_fail": 0,
+    "EM": 0.0,
+    "F1": 0.5,
+    "contains": 1.0,
+    "retrieval_hit_rate": 1.0,
+    "acc_when_hit": 1.0,
+    "acc_when_miss": 0.0
+  },
+  "records": [
+    {
+      "question": "上海轨道交通17号线在2010年改名为什么？",
+      "golds": [
+        "上海轨道交通20号线",
+        "上海轨道交通20号线",
+        "上海轨道交通20号线"
+      ],
+      "pred": "上海轨道交通17号线在2010年后改名为上海轨道交通20号线。",
+      "EM": 0.0,
+      "F1": 0.5,
+      "contains": true,
+      "retrieval_hit": true
+    },
+    {
+      "question": "长常高速的一期工程是是哪里到哪里？",
+      "golds": [
+        "沙至益阳",
+        "沙至益阳",
+        "长沙至益阳"
+      ],
+      "pred": "长常高速的一期工程是长沙至益阳。",
+      "EM": 0.0,
+      "F1": 0.5,
+      "contains": true,
+      "retrieval_hit": true
+    }
+  ]
+}

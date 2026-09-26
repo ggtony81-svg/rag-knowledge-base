@@ -8,3 +8,8 @@ PyMuPDF>=1.24.0
 python-multipart>=0.0.9
 pymysql>=1.1.0
 redis>=4.5.0
+
+# 评测模块 eval/ 额外需要（只跑线上服务可以不装）
+datasets>=2.14.0
+pandas>=2.0.0
+pyarrow>=14.0.0

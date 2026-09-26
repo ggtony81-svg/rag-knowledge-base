@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>雨</title>
+<style>
+*{margin:0;padding:0}
+body{overflow:hidden;background:#000}
+canvas{display:block}
+#c{position:fixed;bottom:28px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.05);border-radius:10px;padding:10px 18px;display:flex;align-items:center;gap:12px;color:#888;font-size:12px;z-index:10}
+#c input[type=range]{-webkit-appearance:none;width:100px;height:1px;background:#333;outline:none}
+#c input::-webkit-slider-thumb{-webkit-appearance:none;width:10px;height:10px;border-radius:50%;background:#aaa;cursor:pointer}
+#iv{color:#fff;min-width:20px;text-align:center}
+</style>
+</head>
+<body>
+<div id="c"><label>💧</label><input type="range" id="s" min="0" max="100" value="60"><span id="iv">60</span></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+// 雨纹理：1x160 超长纯白渐变
+const cv=document.createElement('canvas');
+cv.width=1;cv.height=160;
+const cx=cv.getContext('2d');
+const g=cx.createLinearGradient(0,0,0,160);
+g.addColorStop(0,'rgba(255,255,255,0)');
+g.addColorStop(0.03,'rgba(255,255,255,1)');
+g.addColorStop(0.15,'rgba(255,255,255,0.95)');
+g.addColorStop(0.5,'rgba(255,255,255,0.6)');
+g.addColorStop(0.8,'rgba(255,255,255,0.2)');
+g.addColorStop(1,'rgba(255,255,255,0)');
+cx.fillStyle=g;cx.fillRect(0,0,1,160);
+const tex=new THREE.CanvasTexture(cv);
+
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x000000);
+
+const cam=new THREE.PerspectiveCamera(50,innerWidth/innerHeight,0.1,200);
+cam.position.set(0,3,11);
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+document.body.appendChild(renderer.domElement);
+
+const ctrl=new THREE.OrbitControls(cam,renderer.domElement);
+ctrl.target.set(0,0,0);
+ctrl.enableDamping=true;
+ctrl.maxPolarAngle=Math.PI/2;
+ctrl.minDistance=3;ctrl.maxDistance=20;
+ctrl.update();
+
+// 地面(纯黑)
+const gnd=new THREE.Mesh(new THREE.PlaneGeometry(50,50),new THREE.MeshBasicMaterial({color:0x000000,side:THREE.DoubleSide}));
+gnd.rotation.x=-Math.PI/2;gnd.position.y=-2.8;
+scene.add(gnd);
+
+// 积水反光(辐射渐变)
+const wc=document.createElement('canvas');wc.width=256;wc.height=256;
+const wctx=wc.getContext('2d');
+const wg=wctx.createRadialGradient(128,128,0,128,128,128);
+wg.addColorStop(0,'rgba(40,50,65,0.2)');
+wg.addColorStop(0.2,'rgba(30,40,55,0.12)');
+wg.addColorStop(0.5,'rgba(20,28,40,0.06)');
+wg.addColorStop(1,'rgba(0,0,0,0)');
+wctx.fillStyle=wg;wctx.fillRect(0,0,256,256);
+const wt=new THREE.CanvasTexture(wc);
+const water=new THREE.Mesh(new THREE.PlaneGeometry(50,50),new THREE.MeshBasicMaterial({map:wt,transparent:true,opacity:0.8,side:THREE.DoubleSide,depthWrite:false}));
+water.rotation.x=-Math.PI/2;water.position.y=-2.75;
+scene.add(water);
+
+// 地面中心光晕
+const lc=document.createElement('canvas');lc.width=128;lc.height=128;
+const lctx=lc.getContext('2d');
+const lg=lctx.createRadialGradient(64,64,0,64,64,64);
+lg.addColorStop(0,'rgba(80,100,130,0.1)');
+lg.addColorStop(0.4,'rgba(50,70,100,0.05)');
+lg.addColorStop(1,'rgba(0,0,0,0)');
+lctx.fillStyle=lg;lctx.fillRect(0,0,128,128);
+const lt=new THREE.CanvasTexture(lc);
+const ll=new THREE.Mesh(new THREE.PlaneGeometry(20,20),new THREE.MeshBasicMaterial({map:lt,transparent:true,opacity:0.6,side:THREE.DoubleSide,depthWrite:false,blending:THREE.AdditiveBlending}));
+ll.rotation.x=-Math.PI/2;ll.position.set(0,-2.7,0);
+scene.add(ll);
+
+// 雨 - 超高密度
+const N=35000;
+const geo=new THREE.BufferGeometry();
+const p=new Float32Array(N*3);
+for(let i=0;i<N;i++){p[i*3]=(Math.random()-0.5)*28;p[i*3+1]=Math.random()*18-2;p[i*3+2]=(Math.random()-0.5)*18}
+geo.setAttribute('position',new THREE.BufferAttribute(p,3));
+const rmat=new THREE.PointsMaterial({map:tex,size:0.12,color:0xffffff,transparent:true,opacity:0.3,blending:THREE.AdditiveBlending,depthWrite:false,sizeAttenuation:true});
+const rain=new THREE.Points(geo,rmat);scene.add(rain);
+const spd=new Float32Array(N);for(let i=0;i<N;i++)spd[i]=0.4+Math.random()*0.7;
+
+// 近景雨(更粗更亮，增加层次)
+const N2=5000;
+const geo2=new THREE.BufferGeometry();
+const p2=new Float32Array(N2*3);
+for(let i=0;i<N2;i++){p2[i*3]=(Math.random()-0.5)*26;p2[i*3+1]=Math.random()*16-2;p2[i*3+2]=(Math.random()-0.5)*22}
+geo2.setAttribute('position',new THREE.BufferAttribute(p2,3));
+const rmat2=new THREE.PointsMaterial({map:tex,size:0.25,color:0xffffff,transparent:true,opacity:0.25,blending:THREE.AdditiveBlending,depthWrite:false,sizeAttenuation:true});
+const rain2=new THREE.Points(geo2,rmat2);scene.add(rain2);
+const spd2=new Float32Array(N2);for(let i=0;i<N2;i++)spd2[i]=0.4+Math.random()*0.7;
+
+// 涟漪
+const rips=[];
+for(let i=0;i<80;i++){
+  const r=new THREE.Mesh(new THREE.RingGeometry(0.005,0.025,16),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:0,side:THREE.DoubleSide,depthWrite:false}));
+  r.rotation.x=-Math.PI/2;r.position.set((Math.random()-0.5)*24,-2.7,(Math.random()-0.5)*16);
+  r.userData={life:Math.random(),active:true,spd:0.15+Math.random()*0.4,maxS:0.12+Math.random()*0.25};
+  scene.add(r);rips.push(r);
+}
+
+// UI
+document.getElementById('s').oninput=function(){
+  const v=this.value/100;
+  document.getElementById('iv').textContent=Math.round(v*100);
+  rmat.opacity=0.02+v*0.4;
+  rmat.size=0.03+v*0.15;
+  rmat2.opacity=0.02+v*0.35;
+  rmat2.size=0.06+v*0.3;
+};
+
+// 动画
+const clock=new THREE.Clock();let t=0;
+function anim(){
+  requestAnimationFrame(anim);
+  const dt=clock.getDelta();t+=dt;
+  ctrl.update();
+  const v=document.getElementById('s').value/100||0.6;
+
+  // 主雨
+  const p=rain.geometry.attributes.position.array;
+  for(let i=0;i<N;i++){
+    p[i*3+1]-=spd[i]*dt*25*(0.3+v*0.9);
+    if(p[i*3+1]<-3.5){p[i*3+1]=16+Math.random()*2;p[i*3]=(Math.random()-0.5)*28;p[i*3+2]=(Math.random()-0.5)*18}
+  }
+  rain.geometry.attributes.position.needsUpdate=true;
+
+  // 近景雨
+  const p2=rain2.geometry.attributes.position.array;
+  for(let i=0;i<N2;i++){
+    p2[i*3+1]-=spd2[i]*dt*28*(0.3+v*0.9);
+    if(p2[i*3+1]<-3.5){p2[i*3+1]=14+Math.random()*2;p2[i*3]=(Math.random()-0.5)*26;p2[i*3+2]=(Math.random()-0.5)*22}
+  }
+  rain2.geometry.attributes.position.needsUpdate=true;
+
+  // 积水
+  water.material.opacity=0.3+v*0.5;
+  ll.material.opacity=0.2+v*0.5;
+
+  // 涟漪
+  for(const r of rips){
+    const d=r.userData;
+    if(!d.active){if(Math.random()<v*0.025){d.active=true;d.life=0;r.position.x=(Math.random()-0.5)*26;r.position.z=(Math.random()-0.5)*18;r.scale.set(0.01,0.01,0.01)}continue}
+    d.life+=dt*d.spd*4;
+    if(d.life>1){d.active=false;r.material.opacity=0;continue}
+    const s=d.life*d.maxS;r.scale.set(s,s,s);
+    r.material.opacity=Math.sin(d.life*Math.PI)*0.25*(0.1+v*0.6);
+  }
+
+  renderer.render(scene,cam);
+}
+onresize=()=>{cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)};
+anim();
+</script>
+</body>
+</html>

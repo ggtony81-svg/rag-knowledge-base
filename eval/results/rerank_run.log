@@ -1,0 +1,110 @@
+==============================================================================
+检索方案对比实验 — 数据集：CMRC2018 / BEIR 检索格式
+==============================================================================
+语料库：934 篇文档（原始 1149 篇，去重 215 篇）
+查询集：1149 条，每条 1 篇标准答案文档
+
+
+Loading weights:   0%|          | 0/71 [00:00<?, ?it/s]Loading weights: 100%|██████████| 71/71 [00:00<00:00, 9922.55it/s]
+Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 3210.62it/s]
+运行 方案C 向量+重排序 ...
+   方案C 向量+重排序            P@1=0.9243  Recall@1=0.9243  Recall@3=0.9399  Recall@5=0.9443  Recall@10=0.9460  MRR@10=0.9327  nDCG@10=0.9360  index_sec=0.0  search_ms_mean=6345.68  search_ms_p95=8485.52
+
+'[WinError 10061] 由于目标计算机积极拒绝，无法连接。' thrown while requesting HEAD https://hf-mirror.com/BAAI/bge-reranker-base/resolve/main/./modules.json
+Retrying in 1s [Retry 1/5].
+Traceback (most recent call last):
+  File "D:\shuqi\eval\run_retrieval_eval.py", line 187, in <module>
+    main()
+    ~~~~^^
+  File "D:\shuqi\eval\run_retrieval_eval.py", line 138, in main
+    label, r = "方案C2 BM25+重排序", RerankRetriever(base_kind="bm25",
+                                     ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+                                                    recall_k=args.recall_k)
+                                                    ^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\shuqi\eval\retrievers.py", line 231, in __init__
+    self.reranker = CrossEncoder(rerank_model_name)
+                    ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^
+  File "D:\python\Lib\site-packages\sentence_transformers\util\decorators.py", line 160, in wrapper
+    return func(self, *args, **kwargs)
+  File "D:\python\Lib\site-packages\sentence_transformers\cross_encoder\model.py", line 186, in __init__
+    super().__init__(
+    ~~~~~~~~~~~~~~~~^
+        model_name_or_path=model_name_or_path,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<13 lines>...
+        default_prompt_name=default_prompt_name,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "D:\python\Lib\site-packages\sentence_transformers\base\model.py", line 216, in __init__
+    modules, self.module_kwargs = self._load_modules(
+                                  ~~~~~~~~~~~~~~~~~~^
+        model_name_or_path,
+        ^^^^^^^^^^^^^^^^^^^
+    ...<7 lines>...
+        config_kwargs=config_kwargs,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "D:\python\Lib\site-packages\sentence_transformers\base\model.py", line 981, in _load_modules
+    modules_json_path = load_file_path(
+        model_name_or_path,
+    ...<4 lines>...
+        local_files_only=local_files_only,
+    )
+  File "D:\python\Lib\site-packages\sentence_transformers\util\file_io.py", line 116, in load_file_path
+    return hf_hub_download(
+        model_name_or_path,
+    ...<6 lines>...
+        local_files_only=local_files_only,
+    )
+  File "D:\python\Lib\site-packages\huggingface_hub\utils\_validators.py", line 88, in _inner_fn
+    return fn(*args, **kwargs)
+  File "D:\python\Lib\site-packages\huggingface_hub\file_download.py", line 1013, in hf_hub_download
+    return _hf_hub_download_to_cache_dir(
+        # Destination
+    ...<15 lines>...
+        dry_run=dry_run,
+    )
+  File "D:\python\Lib\site-packages\huggingface_hub\file_download.py", line 1147, in _hf_hub_download_to_cache_dir
+    _get_metadata_or_catch_error(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        repo_id=repo_id,
+        ^^^^^^^^^^^^^^^^
+    ...<10 lines>...
+        retry_on_errors=True,
+        ^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "D:\python\Lib\site-packages\huggingface_hub\file_download.py", line 1707, in _get_metadata_or_catch_error
+    metadata = get_hf_file_metadata(
+        url=url,
+    ...<4 lines>...
+        retry_on_errors=retry_on_errors,
+    )
+  File "D:\python\Lib\site-packages\huggingface_hub\utils\_validators.py", line 88, in _inner_fn
+    return fn(*args, **kwargs)
+  File "D:\python\Lib\site-packages\huggingface_hub\file_download.py", line 1615, in get_hf_file_metadata
+    response = _httpx_follow_relative_redirects_with_backoff(
+        method="HEAD", url=url, headers=hf_headers, timeout=timeout, retry_on_errors=retry_on_errors
+    )
+  File "D:\python\Lib\site-packages\huggingface_hub\utils\_http.py", line 719, in _httpx_follow_relative_redirects_with_backoff
+    response = http_backoff(
+        method=method,
+    ...<3 lines>...
+        **no_retry_kwargs,
+    )
+  File "D:\python\Lib\site-packages\huggingface_hub\utils\_http.py", line 596, in http_backoff
+    return next(
+        _http_backoff_base(
+    ...<9 lines>...
+        )
+    )
+  File "D:\python\Lib\site-packages\huggingface_hub\utils\_http.py", line 504, in _http_backoff_base
+    response = client.request(method=method, url=url, **kwargs)
+  File "D:\python\Lib\site-packages\httpx\_client.py", line 825, in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+           ~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\python\Lib\site-packages\httpx\_client.py", line 901, in send
+    raise RuntimeError("Cannot send a request, as the client has been closed.")
+RuntimeError: Cannot send a request, as the client has been closed.

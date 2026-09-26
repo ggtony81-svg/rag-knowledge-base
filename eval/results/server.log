@@ -1,0 +1,35 @@
+加载模型中...
+Loading weights:   0%|          | 0/71 [00:00<?, ?it/s]Loading weights: 100%|██████████| 71/71 [00:00<00:00, 8267.74it/s]
+Loading weights:   0%|          | 0/201 [00:00<?, ?it/s]Loading weights:  61%|██████    | 123/201 [00:00<00:00, 1222.58it/s]Loading weights: 100%|██████████| 201/201 [00:00<00:00, 1401.95it/s]
+模型就绪
+Redis 就绪
+MySQL 就绪
+加载知识库: test_handbook.pdf (10 块)
+== PDF 问答优化版启动 ==
+   CrossEncoder 重排序 + 知识库持久化
+== http://127.0.0.1:18005 ==
+INFO:     Started server process [23512]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:18005 (Press CTRL+C to quit)
+INFO:     127.0.0.1:6036 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6037 - "GET /static/style.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6038 - "GET /static/app.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6039 - "GET /kb/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6040 - "GET /status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6042 - "POST /ask/v2 HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:6043 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6058 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:2577 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:2577 - "GET /static/style.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:2577 - "GET /static/app.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:2577 - "GET /kb/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:2577 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:3275 - "GET /conversations HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1593 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1593 - "GET /static/style.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8205 - "GET /static/app.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8205 - "GET /kb/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1593 - "GET /conversations HTTP/1.1" 200 OK
+INFO:     127.0.0.1:1593 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:11563 - "GET /status HTTP/1.1" 200 OK

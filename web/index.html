@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF 文档问答系统</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="logo">Q</span>
+    <div>
+      <h1>PDF 文档问答系统</h1>
+      <p class="sub">向量检索 + 大模型生成</p>
+    </div>
+  </div>
+  <div class="kb-status" id="kbStatus">
+    <span class="dot"></span>
+    <span id="kbText">正在检查知识库…</span>
+  </div>
+</header>
+
+<div class="layout">
+
+  <!-- 左侧边栏 -->
+  <aside class="sidebar">
+    <section class="panel">
+      <h2>知识库</h2>
+      <div class="upload-box" id="uploadBox">
+        <input type="file" id="fileInput" accept=".pdf" hidden>
+        <div class="upload-inner">
+          <span class="upload-icon">＋</span>
+          <p>点击上传 PDF</p>
+          <small>上传后将对该文档建立索引</small>
+        </div>
+      </div>
+      <ul class="kb-info" id="kbInfo">
+        <li><span>文档</span><b id="infoFile">—</b></li>
+        <li><span>分块数</span><b id="infoChunks">—</b></li>
+      </ul>
+    </section>
+
+    <section class="panel">
+      <h2>会话记录</h2>
+      <button class="btn-new" id="btnNew">＋ 新建对话</button>
+      <ul class="conv-list" id="convList">
+        <li class="empty">暂无历史会话</li>
+      </ul>
+    </section>
+  </aside>
+
+  <!-- 主对话区 -->
+  <main class="chat">
+    <div class="messages" id="messages">
+      <div class="welcome" id="welcome">
+        <h2>开始提问</h2>
+        <p>系统会先从 PDF 中找到与问题相关的段落，再用大模型据此作答。</p>
+        <div class="samples">
+          <span class="sample">年假有多少天？</span>
+          <span class="sample">病假期间工资怎么算？</span>
+          <span class="sample">加班费怎么计算？</span>
+          <span class="sample">迟到会怎么处理？</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="composer">
+      <textarea id="input" rows="1" placeholder="输入你的问题，Enter 发送 / Shift+Enter 换行"></textarea>
+      <button id="btnSend">发送</button>
+    </div>
+  </main>
+
+</div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

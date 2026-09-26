@@ -1,0 +1,64 @@
+D:\shuqi\eval\finetune_embedding.py:172: DeprecationWarning: Importing from 'sentence_transformers.losses' is deprecated and will be removed in a future version. Please use 'sentence_transformers.sentence_transformer.losses' instead.
+  from sentence_transformers import SentenceTransformer, losses
+==============================================================================
+微调向量检索模型
+==============================================================================
+基础模型        : BAAI/bge-small-zh-v1.5
+剔除泄漏句对    : 768 条（训练语料与评测语料重叠）
+训练集          : 8031 句对 / 2080 篇文档
+验证集          : 437 句对 / 109 篇文档
+超参数          : epochs=3 batch=16 lr=2e-05 max_len=512 warmup=0.1 patience=2
+
+Loading weights:   0%|          | 0/71 [00:00<?, ?it/s]Loading weights: 100%|██████████| 71/71 [00:00<00:00, 10229.66it/s]
+epoch 1/3 训练中（共 501 批）...
+    epoch1 批次 50  loss=0.1413  lr=6.57e-06
+    epoch1 批次 100  loss=0.1363  lr=1.26e-05
+    epoch1 批次 150  loss=0.1228  lr=1.80e-05
+    epoch1 批次 200  loss=0.1113  lr=1.73e-05
+    epoch1 批次 250  loss=0.1023  lr=1.67e-05
+    epoch1 批次 300  loss=0.1013  lr=1.60e-05
+    epoch1 批次 350  loss=0.0955  lr=1.53e-05
+    epoch1 批次 400  loss=0.0906  lr=1.47e-05
+    epoch1 批次 450  loss=0.0877  lr=1.40e-05
+    epoch1 批次 500  loss=0.0851  lr=1.33e-05
+epoch 1 验证中（共 27 批）...
+epoch 1 完成  train_loss=0.0850  val_loss=1.3401  耗时 6461s
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00, 15.56it/s]
+  验证损失创新低，已保存模型 -> eval/cache/finetuned_model
+epoch 2/3 训练中（共 501 批）...
+    epoch2 批次 50  loss=0.0441  lr=1.27e-05
+    epoch2 批次 100  loss=0.0511  lr=1.20e-05
+    epoch2 批次 150  loss=0.0459  lr=1.13e-05
+    epoch2 批次 200  loss=0.0414  lr=1.07e-05
+    epoch2 批次 250  loss=0.0381  lr=1.00e-05
+    epoch2 批次 300  loss=0.0388  lr=9.34e-06
+    epoch2 批次 350  loss=0.0366  lr=8.68e-06
+    epoch2 批次 400  loss=0.0354  lr=8.01e-06
+    epoch2 批次 450  loss=0.0347  lr=7.35e-06
+    epoch2 批次 500  loss=0.0345  lr=6.68e-06
+epoch 2 验证中（共 27 批）...
+epoch 2 完成  train_loss=0.0346  val_loss=1.3345  耗时 3100s
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00, 15.34it/s]
+  验证损失创新低，已保存模型 -> eval/cache/finetuned_model
+epoch 3/3 训练中（共 501 批）...
+    epoch3 批次 50  loss=0.0255  lr=6.00e-06
+    epoch3 批次 100  loss=0.0301  lr=5.34e-06
+    epoch3 批次 150  loss=0.0272  lr=4.67e-06
+    epoch3 批次 200  loss=0.0241  lr=4.01e-06
+    epoch3 批次 250  loss=0.0221  lr=3.34e-06
+    epoch3 批次 300  loss=0.0230  lr=2.67e-06
+    epoch3 批次 350  loss=0.0219  lr=2.01e-06
+    epoch3 批次 400  loss=0.0216  lr=1.34e-06
+    epoch3 批次 450  loss=0.0212  lr=6.79e-07
+    epoch3 批次 500  loss=0.0216  lr=1.33e-08
+epoch 3 验证中（共 27 批）...
+epoch 3 完成  train_loss=0.0216  val_loss=1.3359  耗时 3421s
+  验证损失未下降（1/2）
+
+训练结束。最优 epoch=2，最优验证损失=1.3345
+总耗时 216.4 分钟
+训练曲线数据：D:\shuqi\eval\results\finetune_history_20260921_173245.json
+模型保存于：eval/cache/finetuned_model
+
+下一步：用微调后的模型重新评测检索效果
+  python eval/run_retrieval_eval.py --schemes dense_ft --ft-model eval/cache/finetuned_model

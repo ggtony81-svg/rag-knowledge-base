@@ -1,0 +1,42 @@
+{
+  "config": {
+    "model": "BAAI/bge-small-zh-v1.5",
+    "out": "D:\\shuqi\\eval\\cache\\finetuned_model",
+    "epochs": 1,
+    "batch_size": 16,
+    "lr": 2e-05,
+    "warmup_ratio": 0.1,
+    "max_seq_length": 256,
+    "patience": 2,
+    "max_steps": 3,
+    "seed": 42
+  },
+  "stats": {
+    "eval_corpus_size": 934,
+    "dropped_leak_pairs": 768,
+    "train_pairs": 8031,
+    "train_contexts": 2080,
+    "val_pairs": 437,
+    "val_contexts": 109
+  },
+  "epochs": [
+    {
+      "epoch": 1,
+      "global_step": 3,
+      "train_loss": 0.065421,
+      "val_loss": 1.373134,
+      "lr": 0.0,
+      "elapsed_sec": 91.8
+    }
+  ],
+  "batch_loss_epoch1": [
+    0.105618,
+    0.063435,
+    0.027208
+  ],
+  "batches_per_epoch": 3,
+  "total_epoch_steps": 3,
+  "best_epoch": 1,
+  "best_val_loss": 1.373134,
+  "total_time_sec": 92.5
+}

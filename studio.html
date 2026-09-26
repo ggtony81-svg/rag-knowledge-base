@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI 协作工坊</title>
+<style>
+:root {
+  --bg: #0a0a0f;
+  --bg-2: #101018;
+  --card: rgba(255,255,255,0.04);
+  --card-border: rgba(255,255,255,0.08);
+  --text: #e8e8ea;
+  --text-2: #8a8a95;
+  --accent: #7c6cf0;
+  --accent-2: #4aa8ff;
+  --planner: #7c6cf0;
+  --writer: #34c759;
+  --critic: #ff5f5f;
+  --optimizer: #ffb020;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* 背景光效 */
+.bg-glow {
+  position: fixed;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: 0;
+}
+.bg-glow-1 { width: 500px; height: 500px; background: var(--accent); top: -150px; left: -100px; }
+.bg-glow-2 { width: 400px; height: 400px; background: var(--accent-2); bottom: -100px; right: -100px; }
+
+/* 顶部导航 */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 56px;
+  background: rgba(10,10,15,0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--card-border);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  z-index: 100;
+}
+.logo {
+  font-size: 16px;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 0.5px;
+}
+.nav-spacer { flex: 1; }
+
+/* 主容器 */
+main {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 88px 20px 40px;
+  position: relative;
+  z-index: 1;
+}
+
+/* 英雄区 */
+.hero { text-align: center; margin-bottom: 40px; }
+.hero h1 {
+  font-size: 32px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #fff, #a0a0b8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 8px;
+}
+.hero p { color: var(--text-2); font-size: 14px; }
+
+/* Agent 流程条 */
+.flow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  margin: 28px 0 32px;
+  flex-wrap: wrap;
+}
+.flow-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 24px;
+  padding: 8px 16px;
+  font-size: 13px;
+  color: var(--text-2);
+}
+.flow-item .dot { width: 8px; height: 8px; border-radius: 50%; }
+.flow-item.active { color: var(--text); border-color: rgba(255,255,255,0.2); }
+.flow-arrow { color: var(--text-2); margin: 0 8px; font-size: 14px; opacity: 0.5; }
+
+/* 任务输入 */
+.task-box {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+}
+.task-label { font-size: 12px; color: var(--text-2); margin-bottom: 12px; letter-spacing: 0.5px; }
+.task-type-row { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.type-btn {
+  padding: 6px 16px;
+  border-radius: 20px;
+  border: 1px solid var(--card-border);
+  background: transparent;
+  color: var(--text-2);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.type-btn:hover { color: var(--text); border-color: rgba(255,255,255,0.25); }
+.type-btn.selected {
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 20px rgba(124,108,240,0.3);
+}
+textarea {
+  width: 100%;
+  min-height: 90px;
+  background: var(--bg-2);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  color: var(--text);
+  padding: 14px;
+  font-size: 14px;
+  font-family: inherit;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+}
+textarea:focus { border-color: rgba(124,108,240,0.5); }
+textarea::placeholder { color: var(--text-2); opacity: 0.6; }
+
+.run-btn {
+  width: 100%;
+  margin-top: 14px;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+  transition: transform 0.15s, box-shadow 0.2s;
+}
+.run-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 30px rgba(124,108,240,0.4); }
+.run-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+/* 协作过程 */
+.process { margin-top: 32px; }
+.process-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.spinner {
+  width: 16px; height: 16px;
+  border: 2px solid var(--card-border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: none;
+}
+.spinner.show { display: inline-block; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.agent-card {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 12px;
+  opacity: 0;
+  transform: translateY(12px);
+  animation: fadeIn 0.4s ease forwards;
+}
+@keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
+
+.agent-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.agent-icon {
+  width: 32px; height: 32px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+}
+.agent-name { font-size: 14px; font-weight: 600; }
+.agent-action { font-size: 12px; color: var(--text-2); }
+.agent-score {
+  margin-left: auto;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 3px 12px;
+  border-radius: 20px;
+}
+.agent-content {
+  font-size: 13px;
+  line-height: 1.7;
+  color: #c8c8d0;
+  white-space: pre-wrap;
+  font-family: inherit;
+}
+.agent-content code {
+  background: var(--bg-2);
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+/* 完成卡片 */
+.done-card {
+  text-align: center;
+  padding: 32px 20px;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  margin-top: 16px;
+  opacity: 0;
+  transform: scale(0.95);
+  animation: popIn 0.5s ease forwards;
+}
+@keyframes popIn { to { opacity: 1; transform: scale(1); } }
+.done-score {
+  font-size: 56px;
+  font-weight: 800;
+  margin: 12px 0 4px;
+}
+.done-label { font-size: 13px; color: var(--text-2); }
+.done-rounds { font-size: 12px; color: var(--text-2); margin-top: 8px; }
+
+/* 历史 */
+.history-list { margin-top: 20px; }
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.history-item:hover { background: rgba(255,255,255,0.07); }
+.history-title { font-size: 14px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.history-meta { font-size: 12px; color: var(--text-2); }
+
+/* 空状态 */
+.empty { text-align: center; color: var(--text-2); font-size: 13px; padding: 40px 0; }
+
+/* 响应式 */
+@media (max-width: 640px) {
+  .flow-arrow { display: none; }
+  .hero h1 { font-size: 24px; }
+}
+</style>
+</head>
+<body>
+<div class="bg-glow bg-glow-1"></div>
+<div class="bg-glow bg-glow-2"></div>
+
+<nav>
+  <div class="logo">⚡ AI 协作工坊</div>
+  <div class="nav-spacer"></div>
+  <button class="type-btn" id="nav-history">📋 历史记录</button>
+  <button class="type-btn" id="nav-new" style="display:none">＋ 新任务</button>
+</nav>
+
+<main>
+  <!-- 开始页 -->
+  <div id="view-start">
+    <div class="hero">
+      <h1>一个任务，一个 AI 团队</h1>
+      <p>策划师 · 执行者 · 审查员 · 优化者 —— 四个 AI 角色协作迭代，产出高质量成果</p>
+    </div>
+
+    <div class="flow">
+      <div class="flow-item"><span class="dot" style="background:var(--planner)"></span>策划师</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-item"><span class="dot" style="background:var(--writer)"></span>执行者</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-item"><span class="dot" style="background:var(--critic)"></span>审查员</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-item"><span class="dot" style="background:var(--optimizer)"></span>优化者</div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-item"><span class="dot" style="background:var(--accent)"></span>循环迭代</div>
+    </div>
+
+    <div class="task-box">
+      <div class="task-label">选择任务类型</div>
+      <div class="task-type-row" id="type-row">
+        <button class="type-btn selected" data-type="写代码">💻 写代码</button>
+        <button class="type-btn" data-type="写文章">📝 写文章</button>
+        <button class="type-btn" data-type="写方案">📋 写方案</button>
+        <button class="type-btn" data-type="写文案">🎯 写文案</button>
+      </div>
+      <div class="task-label">描述你的需求</div>
+      <textarea id="requirement" placeholder="例如：用 Python 写一个批量重命名文件的脚本，支持按扩展名分类到对应文件夹..."></textarea>
+      <button class="run-btn" id="run-btn">🚀 启动 AI 团队</button>
+    </div>
+  </div>
+
+  <!-- 过程页 -->
+  <div id="view-process" style="display:none">
+    <div class="process">
+      <div class="process-title">
+        <span>🤖 协作过程</span>
+        <span class="spinner" id="spinner"></span>
+        <span style="flex:1"></span>
+        <button class="type-btn" id="process-new" style="display:none">＋ 新任务</button>
+      </div>
+      <div id="steps"></div>
+      <div id="done-area"></div>
+    </div>
+  </div>
+
+  <!-- 历史页 -->
+  <div id="view-history" style="display:none">
+    <div class="hero">
+      <h1>📋 历史任务</h1>
+    </div>
+    <div class="history-list" id="history-list"></div>
+  </div>
+</main>
+
+<script>
+const API = 'http://127.0.0.1:18007';
+let selectedType = '写代码';
+
+// 视图切换
+function showView(name) {
+  document.getElementById('view-start').style.display = name === 'start' ? '' : 'none';
+  document.getElementById('view-process').style.display = name === 'process' ? '' : 'none';
+  document.getElementById('view-history').style.display = name === 'history' ? '' : 'none';
+  document.getElementById('nav-history').style.display = name === 'history' ? 'none' : '';
+  document.getElementById('nav-new').style.display = name === 'history' ? '' : 'none';
+  if (name !== 'process') {
+    document.getElementById('process-new').style.display = 'none';
+  }
+}
+
+document.getElementById('nav-history').onclick = () => showView('history');
+document.getElementById('nav-new').onclick = () => showView('start');
+document.getElementById('process-new').onclick = () => showView('start');
+
+// 类型选择
+document.getElementById('type-row').addEventListener('click', (e) => {
+  if (e.target.classList.contains('type-btn')) {
+    document.querySelectorAll('.type-btn').forEach(b => b.classList.remove('selected'));
+    e.target.classList.add('selected');
+    selectedType = e.target.dataset.type;
+  }
+});
+
+const AGENTS = {
+  '策划师':   { icon: '📋', color: '#7c6cf0', bg: 'rgba(124,108,240,0.15)' },
+  '执行者':   { icon: '🔨', color: '#34c759', bg: 'rgba(52,199,89,0.15)' },
+  '审查员':   { icon: '🔍', color: '#ff5f5f', bg: 'rgba(255,95,95,0.15)' },
+  '优化者':   { icon: '🔧', color: '#ffb020', bg: 'rgba(255,176,32,0.15)' },
+};
+
+function renderStep(step, isFirst) {
+  const info = AGENTS[step.agent] || { icon: '🤖', color: '#fff', bg: 'rgba(255,255,255,0.1)' };
+  const card = document.createElement('div');
+  card.className = 'agent-card';
+  card.innerHTML = `
+    <div class="agent-head">
+      <div class="agent-icon" style="background:${info.bg}">${info.icon}</div>
+      <div>
+        <div class="agent-name" style="color:${info.color}">${step.agent}</div>
+        <div class="agent-action">${step.action}</div>
+      </div>
+      ${step.score ? `<div class="agent-score" style="background:${info.bg};color:${info.color}">${step.score}/10</div>` : ''}
+    </div>
+    <div class="agent-content">${escapeHtml(step.content)}</div>
+  `;
+  document.getElementById('steps').appendChild(card);
+}
+
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// 运行任务
+document.getElementById('run-btn').onclick = async () => {
+  const requirement = document.getElementById('requirement').value.trim();
+  if (!requirement) { alert('请输入任务需求'); return; }
+
+  showView('process');
+  document.getElementById('steps').innerHTML = '';
+  document.getElementById('done-area').innerHTML = '';
+  document.getElementById('spinner').classList.add('show');
+  document.getElementById('process-new').style.display = '';
+  document.getElementById('run-btn').disabled = true;
+
+  try {
+    const resp = await fetch(`${API}/studio/run`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ task_type: selectedType, requirement })
+    });
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      // 按行解析 SSE 事件
+      let idx;
+      while ((idx = buffer.indexOf('\n')) >= 0) {
+        const line = buffer.slice(0, idx).trim();
+        buffer = buffer.slice(idx + 1);
+        if (!line) continue;
+        try {
+          const event = JSON.parse(line);
+          if (event.event === 'step') {
+            renderStep(event);
+            document.getElementById('steps').lastElementChild.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          } else if (event.event === 'done') {
+            showDone(event.score, event.rounds);
+          } else if (event.error) {
+            document.getElementById('steps').innerHTML = `<div class="empty">⚠️ ${escapeHtml(event.error)}</div>`;
+          }
+        } catch (e) { /* 忽略无法解析的行 */ }
+      }
+    }
+  } catch (e) {
+    document.getElementById('steps').innerHTML = '<div class="empty">❌ 连接失败，请确保 API 已启动（python agent_studio_api.py）</div>';
+  }
+
+  document.getElementById('spinner').classList.remove('show');
+  document.getElementById('run-btn').disabled = false;
+};
+
+function showDone(score, rounds) {
+  const color = score >= 8 ? '#34c759' : (score >= 6 ? '#ffb020' : '#ff5f5f');
+  document.getElementById('done-area').innerHTML = `
+    <div class="done-card">
+      <div style="font-size:13px;color:var(--text-2)">协作完成 · ${rounds} 轮迭代</div>
+      <div class="done-score" style="color:${color}">${score}<span style="font-size:24px">/10</span></div>
+      <div class="done-label">最终评分</div>
+      <div class="done-rounds">策划 → 执行 → 审查 → 优化 → 循环</div>
+    </div>
+  `;
+  document.getElementById('done-area').lastElementChild.scrollIntoView({ behavior: 'smooth' });
+}
+
+// 历史记录
+document.getElementById('nav-history').onclick = loadHistory;
+
+async function loadHistory() {
+  showView('history');
+  const list = document.getElementById('history-list');
+  list.innerHTML = '<div class="empty">加载中...</div>';
+  try {
+    const resp = await fetch(`${API}/studio/tasks`);
+    const data = await resp.json();
+    const tasks = data.tasks || [];
+    if (!tasks.length) { list.innerHTML = '<div class="empty">还没有历史任务</div>'; return; }
+
+    list.innerHTML = '';
+    for (const t of tasks) {
+      const item = document.createElement('div');
+      item.className = 'history-item';
+      item.innerHTML = `
+        <span style="font-size:18px">${t.type === '写代码' ? '💻' : t.type === '写文章' ? '📝' : t.type === '写方案' ? '📋' : '🎯'}</span>
+        <span class="history-title">${t.title}</span>
+        <span class="history-meta">${t.status === 'done' ? '✅ 完成' : '⏳ 进行中'} · ${t.time}</span>
+      `;
+      item.onclick = () => loadTaskDetail(t.id);
+      list.appendChild(item);
+    }
+  } catch (e) {
+    list.innerHTML = '<div class="empty">❌ 服务未连接</div>';
+  }
+}
+
+async function loadTaskDetail(id) {
+  showView('process');
+  document.getElementById('steps').innerHTML = '';
+  document.getElementById('done-area').innerHTML = '';
+  try {
+    const resp = await fetch(`${API}/studio/task/${id}`);
+    const data = await resp.json();
+    const steps = data.steps || [];
+    if (data.from_cache) {
+      document.getElementById('done-area').innerHTML =
+        '<div style="font-size:12px;color:var(--text-2);padding:6px 0">⚡ 本次数据来自 Redis 缓存，没有查 MySQL</div>';
+    }
+    if (!steps.length) { document.getElementById('steps').innerHTML = '<div class="empty">无记录</div>'; return; }
+    for (const s of steps) renderStep(s);
+  } catch (e) {
+    document.getElementById('steps').innerHTML = '<div class="empty">❌ 加载失败</div>';
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+{
+  "dataset": {
+    "corpus_size": 934,
+    "corpus_raw": 1149,
+    "query_count": 8
+  },
+  "results": {
+    "dense_rerank": {
+      "label": "方案C 向量+重排序",
+      "metrics": {
+        "Recall@1": 0.875,
+        "Recall@3": 0.875,
+        "Recall@5": 0.875,
+        "Recall@10": 0.875,
+        "MRR@10": 0.875,
+        "nDCG@10": 0.875,
+        "P@1": 0.875,
+        "_queries": 8
+      },
+      "timing": {
+        "index_sec": 0.0,
+        "search_ms_mean": 2111.87,
+        "search_ms_p95": 2151.76
+      }
+    },
+    "bm25_rerank": {
+      "label": "方案C2 BM25+重排序",
+      "metrics": {
+        "Recall@1": 1.0,
+        "Recall@3": 1.0,
+        "Recall@5": 1.0,
+        "Recall@10": 1.0,
+        "MRR@10": 1.0,
+        "nDCG@10": 1.0,
+        "P@1": 1.0,
+        "_queries": 8
+      },
+      "timing": {
+        "index_sec": 2.49,
+        "search_ms_mean": 2091.4,
+        "search_ms_p95": 2154.66
+      }
+    }
+  }
+}

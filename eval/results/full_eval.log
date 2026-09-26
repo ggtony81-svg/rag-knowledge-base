@@ -1,0 +1,40 @@
+==============================================================================
+检索方案对比实验 — 数据集：CMRC2018 / BEIR 检索格式
+==============================================================================
+语料库：934 篇文档（原始 1149 篇，去重 215 篇）
+查询集：1149 条，每条 1 篇标准答案文档
+
+
+运行 方案A BM25关键词 ...
+D:\python\Lib\site-packages\jieba\_compat.py:18: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+Building prefix dict from the default dictionary ...
+Loading model from cache C:\Users\1\AppData\Local\Temp\jieba.cache
+Loading model cost 1.943 seconds.
+Prefix dict has been built successfully.
+   方案A BM25关键词           P@1=0.9164  Recall@1=0.9164  Recall@3=0.9721  Recall@5=0.9782  Recall@10=0.9878  MRR@10=0.9455  nDCG@10=0.9561  index_sec=9.81  search_ms_mean=7.14  search_ms_p95=15.87
+
+Loading weights:   0%|          | 0/71 [00:00<?, ?it/s]Loading weights: 100%|██████████| 71/71 [00:00<00:00, 3407.31it/s]
+运行 方案B 向量检索 ...
+   方案B 向量检索              P@1=0.8590  Recall@1=0.8590  Recall@3=0.9017  Recall@5=0.9278  Recall@10=0.9460  MRR@10=0.8863  nDCG@10=0.9007  index_sec=0.0  search_ms_mean=18.08  search_ms_p95=22.36
+
+Loading weights:   0%|          | 0/71 [00:00<?, ?it/s]Loading weights: 100%|██████████| 71/71 [00:00<00:00, 6467.49it/s]
+运行 方案E 分块向量检索 ...
+[transformers] Token indices sequence length is longer than the specified maximum sequence length for this model (766 > 512). Running this sequence through the model will result in indexing errors
+   方案E 分块向量检索            P@1=0.9017  Recall@1=0.9017  Recall@3=0.9426  Recall@5=0.9556  Recall@10=0.9652  MRR@10=0.9249  nDCG@10=0.9348  index_sec=107.82  search_ms_mean=21.03  search_ms_p95=27.71
+
+Loading weights:   0%|          | 0/71 [00:00<?, ?it/s]Loading weights: 100%|██████████| 71/71 [00:00<00:00, 2792.03it/s]
+运行 方案D 向量检索(微调) ...
+   方案D 向量检索(微调)          P@1=0.8895  Recall@1=0.8895  Recall@3=0.9356  Recall@5=0.9556  Recall@10=0.9669  MRR@10=0.9158  nDCG@10=0.9283  index_sec=0.0  search_ms_mean=21.94  search_ms_p95=28.79
+
+==============================================================================
+汇总
+==============================================================================
+方案                         P@1     R@1     R@3     R@5    R@10   MRR@10  nDCG@10     耗时(ms)
+-------------------------------------------------------------------------------------------
+方案A BM25关键词           0.9164  0.9164  0.9721  0.9782  0.9878   0.9455   0.9561        7.1
+方案B 向量检索              0.8590  0.8590  0.9017  0.9278  0.9460   0.8863   0.9007       18.1
+方案E 分块向量检索            0.9017  0.9017  0.9426  0.9556  0.9652   0.9249   0.9348       21.0
+方案D 向量检索(微调)          0.8895  0.8895  0.9356  0.9556  0.9669   0.9158   0.9283       21.9
+
+结果已保存：d:\shuqi\eval\results\retrieval_20260923_090048.json
