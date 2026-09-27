@@ -6,7 +6,7 @@ from fastapi.responses import StreamingResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import uvicorn, os, json, time, requests, numpy as np, pymysql, pickle
+import uvicorn, os, json, time, requests, numpy as np, pymysql, pickle, hashlib
 
 import sys
 script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -35,6 +35,7 @@ model = SentenceTransformer(MODEL_PATH)
 print("模型就绪")
 
 doc_chunks, doc_vectors = [], None
+kb_fp = ""   # 当前知识库的内容指纹，跟着知识库一起更新（见 compute_kb_fp）
 KB_DIR = "d:/shuqi/knowledge_base"
 UPLOAD_DIR = "d:/shuqi/uploads"
 for d in [KB_DIR, UPLOAD_DIR]: os.makedirs(d, exist_ok=True)
@@ -62,6 +63,29 @@ def kb_signature():
         "dim": int(model.get_embedding_dimension()),
     }
 
+def compute_kb_fp(chunks):
+    """
+    算出当前知识库的指纹：内容 + 生成它的方式。
+
+    一条回答由「问题 + 知识库内容 + 检索模型」三者共同决定，所以缓存 key
+    必须把这三样都带上。只带问题的话，换了 PDF 再问同一个问题，命中的是
+    上一份 PDF 的回答 —— 不报错、页面正常，只是答的是别的文档。
+
+    把指纹写进 key 之后，内容一变 key 就变了，旧缓存自动查不到，
+    不用再指望谁记得去手动清缓存。
+    """
+    sig = kb_signature()
+    raw = "|".join([
+        sig["model"], str(sig["max_tokens"]),
+        str(sig["overlap_tokens"]), str(sig["dim"]),
+        *chunks,
+    ])
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
+
+def qa_cache_key(question):
+    """问答缓存的 key。两处问答接口共用，避免改动时漏掉一处。"""
+    return f"qa:{kb_fp}:{question}"
+
 def save_kb(fn):
     with open(f"{KB_DIR}/chunks.pkl", "wb") as f: pickle.dump(doc_chunks, f)
     np.save(f"{KB_DIR}/vectors.npy", doc_vectors)
@@ -76,7 +100,7 @@ def load_kb():
     沿用旧向量，相似度照样算得出来（维度都是 512），只是算出来的是错的
     —— 不报错、不崩溃，静默给出错误排序。
     """
-    global doc_chunks, doc_vectors, current_filename
+    global doc_chunks, doc_vectors, current_filename, kb_fp
     try:
         with open(f"{KB_DIR}/meta.json", encoding="utf-8") as f:
             info = json.load(f)
@@ -90,6 +114,7 @@ def load_kb():
         with open(f"{KB_DIR}/chunks.pkl", "rb") as f: doc_chunks = pickle.load(f)
         doc_vectors = np.load(f"{KB_DIR}/vectors.npy")
         current_filename = info["filename"]
+        kb_fp = compute_kb_fp(doc_chunks)
         print(f"加载知识库: {current_filename} ({len(doc_chunks)} 块)")
     except FileNotFoundError:
         print("无持久化知识库，请上传 PDF")
@@ -125,7 +150,7 @@ def kb_status():
 
 @app.post("/upload")
 async def upload_pdf(file: UploadFile = File(...)):
-    global doc_chunks, doc_vectors, current_filename
+    global doc_chunks, doc_vectors, current_filename, kb_fp
     current_filename = file.filename
     p = os.path.join(UPLOAD_DIR, file.filename)
     with open(p, "wb") as f: f.write(await file.read())
@@ -138,6 +163,7 @@ async def upload_pdf(file: UploadFile = File(...)):
     if not doc_chunks:
         return {"error": "这份 PDF 没有提取到可用文字（可能是扫描件或纯图片），换一份试试"}
     doc_vectors = model.encode(doc_chunks, normalize_embeddings=True)
+    kb_fp = compute_kb_fp(doc_chunks)   # 必须在 save_kb 之前：换了文档，缓存身份跟着换
     save_kb(current_filename)
     return {"filename": file.filename, "pages": n, "chunks": len(doc_chunks), "total_chars": len(t)}
 
@@ -157,7 +183,7 @@ def ask_stream(req: ChatRequest):
         cursor.execute("INSERT INTO messages (conversation_id, role, content) VALUES (%s, %s, %s)", (conv_id, "user", req.question))
         conn.commit(); cursor.close(); conn.close()
     except: pass
-    cache_key = f"qa:{req.question}"
+    cache_key = qa_cache_key(req.question)
     cached = r.get(cache_key)
     if cached:
         try:
@@ -330,7 +356,7 @@ def ask_v2(req: ChatRequest):
         t0 = time.time()
         yield sse({"type": "meta", "conv_id": conv_id})
 
-        cache_key = f"qa:{req.question}"
+        cache_key = qa_cache_key(req.question)
         try:
             cached = r.get(cache_key)
         except Exception:
