@@ -36,8 +36,9 @@ print("模型就绪")
 
 doc_chunks, doc_vectors = [], None
 kb_fp = ""   # 当前知识库的内容指纹，跟着知识库一起更新（见 compute_kb_fp）
-KB_DIR = "d:/shuqi/knowledge_base"
-UPLOAD_DIR = "d:/shuqi/uploads"
+# 相对脚本所在目录，别人 clone 下来不用改路径就能跑（原来是写死的 d:/shuqi/...）
+KB_DIR = os.path.join(script_dir, "knowledge_base")
+UPLOAD_DIR = os.path.join(script_dir, "uploads")
 for d in [KB_DIR, UPLOAD_DIR]: os.makedirs(d, exist_ok=True)
 r = redis_lib.Redis(host="localhost", port=6379, decode_responses=True)
 print("Redis 就绪")

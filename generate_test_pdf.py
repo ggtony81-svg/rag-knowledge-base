@@ -14,7 +14,8 @@ import sys
 
 import fitz
 
-OUT_PATH = sys.argv[1] if len(sys.argv) > 1 else "d:/shuqi/test_handbook.pdf"
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+OUT_PATH = sys.argv[1] if len(sys.argv) > 1 else os.path.join(SCRIPT_DIR, "test_handbook.pdf")
 FONT_PATH = "C:/Windows/Fonts/simsun.ttc"   # 宋体
 FONT_NAME = "china-s"
 
