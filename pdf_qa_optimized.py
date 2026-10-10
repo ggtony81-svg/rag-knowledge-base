@@ -129,7 +129,10 @@ def retrieve(question, top_k=3):
     一次矩阵乘法算完 —— 原来是逐块跑 Python 循环，块一多就明显变慢。
     """
     t1 = time.time()
-    # 不做 CrossEncoder 重排序：P@1 与"分块+微调"完全相同（都是 92.4%）却慢 365 倍（6.3s vs 17ms）
+    # 线上不做 CrossEncoder 重排序：评测里"分块+微调"的 P@1 已经和"向量+重排序"
+    # 一样（都是 92.4%），而检索耗时是 15ms 量级 vs 6.3s，差两个数量级。
+    # 注意这是基于已跑过的实验做的取舍，不等于"重排序没用"——它在"分块+微调"
+    # 之上还有没有增益并没有测过（那需要再跑一个方案 G）。详见 README。
     qv = model.encode([question], normalize_embeddings=True)[0]
     scores = doc_vectors @ qv
     top = np.argsort(scores)[-top_k:][::-1]
@@ -151,19 +154,35 @@ def kb_status():
 @app.post("/upload")
 async def upload_pdf(file: UploadFile = File(...)):
     global doc_chunks, doc_vectors, current_filename, kb_fp
-    current_filename = file.filename
-    p = os.path.join(UPLOAD_DIR, file.filename)
-    with open(p, "wb") as f: f.write(await file.read())
     import fitz
-    doc = fitz.open(p); t = "".join(page.get_text() for page in doc)
-    n = len(doc); doc.close()
-    doc_chunks = smart_chunk_v2(t, max_tokens=CHUNK_MAX_TOKENS,
-                               overlap_tokens=CHUNK_OVERLAP_TOKENS,
-                               tokenizer=model.tokenizer)
-    if not doc_chunks:
+
+    # 先在内存里试着解析，成功了再落盘。
+    # 直接按扩展名信任文件会有两个问题：改名成 .pdf 的文本文件会让 fitz 抛异常
+    # 变成 500，而且失败的文件还留在 uploads/ 里。
+    data = await file.read()
+    try:
+        doc = fitz.open(stream=data, filetype="pdf")
+    except Exception:
+        return {"error": "这个文件不是有效的 PDF，无法解析，请换一个文件"}
+    t = "".join(page.get_text() for page in doc)
+    n = len(doc)
+    doc.close()
+
+    p = os.path.join(UPLOAD_DIR, os.path.basename(file.filename))
+    with open(p, "wb") as f: f.write(data)
+    chunks = smart_chunk_v2(t, max_tokens=CHUNK_MAX_TOKENS,
+                            overlap_tokens=CHUNK_OVERLAP_TOKENS,
+                            tokenizer=model.tokenizer)
+    if not chunks:
+        # 扫描件/纯图片 PDF 提不出文字，这里直接返回，不能动任何全局状态。
+        # 否则 current_filename 换了、doc_chunks 还是旧文档的，
+        # 界面上会显示新文件名配旧知识库，答出来的内容是上一份 PDF 的。
         return {"error": "这份 PDF 没有提取到可用文字（可能是扫描件或纯图片），换一份试试"}
-    doc_vectors = model.encode(doc_chunks, normalize_embeddings=True)
+    vectors = model.encode(chunks, normalize_embeddings=True)
+    # 三项都准备好了再一起提交，中途不留下半新半旧的状态
+    doc_chunks, doc_vectors = chunks, vectors
     kb_fp = compute_kb_fp(doc_chunks)   # 必须在 save_kb 之前：换了文档，缓存身份跟着换
+    current_filename = file.filename
     save_kb(current_filename)
     return {"filename": file.filename, "pages": n, "chunks": len(doc_chunks), "total_chars": len(t)}
 
@@ -174,6 +193,7 @@ class ChatRequest(BaseModel):
 @app.post("/ask/stream")
 def ask_stream(req: ChatRequest):
     if not doc_chunks: return StreamingResponse(iter(["请先上传 PDF"]), media_type="text/plain")
+    if not req.question.strip(): return StreamingResponse(iter(["问题不能为空"]), media_type="text/plain")
     conv_id = req.conversation_id
     try:
         conn, cursor = get_db()
@@ -302,7 +322,15 @@ def index():
 
 @app.get("/status")
 def status():
-    return {"status": "ok", "cache_size": r.dbsize(), "kb": len(doc_chunks) > 0,
+    # Redis 是可选依赖，停掉之后问答主流程照常走（缓存直查）。
+    # 但状态接口不能跟着一起挂——它本来就是用来判断服务好没好使的，
+    # Redis 一停就 500，反而分不清是服务挂了还是缓存挂了。
+    try:
+        cache_size, cache_on = r.dbsize(), True
+    except Exception:
+        cache_size, cache_on = None, False
+    return {"status": "ok", "cache_size": cache_size, "cache_on": cache_on,
+            "kb": len(doc_chunks) > 0,
             "file": current_filename, "model": os.path.basename(MODEL_PATH)}
 
 def sse(obj):
@@ -327,6 +355,12 @@ def ask_v2(req: ChatRequest):
     """
     if not doc_chunks:
         return StreamingResponse(iter([sse({"type": "error", "message": "请先上传 PDF 建立知识库"})]),
+                                 media_type="text/event-stream")
+
+    # 空问题和纯空白在这里就挡掉：不挡的话会照样去调一次大模型，
+    # 而模型拿到空问题只能对着检索出来的资料自由发挥，白花一次 token。
+    if not req.question.strip():
+        return StreamingResponse(iter([sse({"type": "error", "message": "问题不能为空"})]),
                                  media_type="text/event-stream")
 
     conv_id = req.conversation_id
