@@ -1,0 +1,27 @@
+{
+  "dataset": {
+    "corpus_size": 934,
+    "corpus_raw": 1149,
+    "query_count": 1149
+  },
+  "results": {
+    "dense_chunk_ft": {
+      "label": "方案F 分块+微调",
+      "metrics": {
+        "Recall@1": 0.9033942558746736,
+        "Recall@3": 0.9460400348128808,
+        "Recall@5": 0.9564838990426457,
+        "Recall@10": 0.9712793733681462,
+        "MRR@10": 0.9272424606628262,
+        "nDCG@10": 0.9379352082448563,
+        "P@1": 0.9033942558746736,
+        "_queries": 1149
+      },
+      "timing": {
+        "index_sec": 107.36,
+        "search_ms_mean": 21.07,
+        "search_ms_p95": 28.53
+      }
+    }
+  }
+}

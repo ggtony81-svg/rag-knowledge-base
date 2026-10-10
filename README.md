@@ -7,6 +7,8 @@
 | **一** | **RAG 知识库问答系统**（含离线评测体系） | 上传 PDF 自动建库，检索后仅依据原文作答；用离线评测把检索选型从"感觉"变成数据，P@1 从 85.9% 提到 92.4% | [`pdf_qa_optimized.py`](pdf_qa_optimized.py)　·　本文主体 |
 | **二** | **多智能体协作系统 · AI 协作工坊** | 4 个 AI 角色迭代协作产出内容；Redis 分布式锁防重复提交，每一步流式推送 | [`agent_studio_api.py`](agent_studio_api.py)　·　见文末 |
 
+**配套文档**：[质检报告](docs/QUALITY_CHECK.md)　·　[数据集说明](docs/DATASET.md)　·　[部署说明](docs/DEPLOYMENT.md)
+
 ---
 
 # 项目一 · RAG 知识库问答系统（含离线评测体系）
@@ -185,6 +187,11 @@ rag-knowledge-base/
 ├── 【项目二】多智能体协作系统
 │   ├── agent_studio_api.py     # 主程序（FastAPI，端口 18007）
 │   └── studio.html             # 前端页面（原生 HTML + CSS + JS，独立打开）
+│
+├── 【项目文档】
+│   ├── docs/QUALITY_CHECK.md   # 质检报告：改了哪些问题、怎么验证的、还剩哪些局限
+│   ├── docs/DATASET.md         # 数据集说明：来源、清洗、数据泄漏剔除、已知局限
+│   └── docs/DEPLOYMENT.md      # 部署说明：环境、安装、启动、常见问题
 │
 ├── config.example.py       # 配置模板 → 复制为 config.py 并填 API Key
 ├── requirements.txt

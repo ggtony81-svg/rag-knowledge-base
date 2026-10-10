@@ -1,0 +1,43 @@
+==============================================================================
+端到端问答质量评测 — 数据集：CMRC2018 验证集
+==============================================================================
+验证集规模：3219 条（含标准答案）
+本次抽样  ：200 条（随机种子 42）
+
+D:\python\Lib\site-packages\jieba\_compat.py:18: UserWarning: pkg_resources is deprecated as an API. See https://setuptools.pypa.io/en/latest/pkg_resources.html. The pkg_resources package is slated for removal as early as 2025-11-30. Refrain from using this package or pin to Setuptools<81.
+  import pkg_resources
+Building prefix dict from the default dictionary ...
+Dumping model to file cache C:\Users\1\AppData\Local\Temp\jieba.cache
+Loading model cost 0.645 seconds.
+Prefix dict has been built successfully.
+检索语料  ：848 篇（建立索引 3.0 秒）
+检索方案  ：BM25 关键词检索（单阶段方案里 P@1 最高且最快）
+生成模型  ：deepseek-chat，资料取检索前 3 段
+提示词风格：concise（对照实验：只给答案本身）
+
+开始评测（每条需要调用一次大模型接口）...
+  [20/200]  平均 EM=0.6500  F1=0.8227  包含率=0.8000
+  [40/200]  平均 EM=0.6750  F1=0.8605  包含率=0.8000
+  [60/200]  平均 EM=0.6667  F1=0.8782  包含率=0.8333
+  [80/200]  平均 EM=0.7250  F1=0.8976  包含率=0.8625
+  [100/200]  平均 EM=0.7200  F1=0.9052  包含率=0.8500
+  [120/200]  平均 EM=0.7167  F1=0.9071  包含率=0.8417
+  [140/200]  平均 EM=0.7500  F1=0.9168  包含率=0.8643
+  [160/200]  平均 EM=0.7562  F1=0.9221  包含率=0.8562
+  [180/200]  平均 EM=0.7722  F1=0.9271  包含率=0.8667
+  [200/200]  平均 EM=0.7650  F1=0.9240  包含率=0.8550
+
+==============================================================================
+汇总
+==============================================================================
+样本数        : 200
+EM            : 0.7650
+F1            : 0.9240
+包含率        : 0.8550
+
+失败归因
+  检索命中标准段落 : 197/200 (98.5%)，其中答对 86.3%
+  检索未命中       : 3/200 (1.5%)，其中答对 33.3%
+
+总耗时 207 秒
+结果已保存：D:\shuqi\eval\results\e2e_20261002_105227.json

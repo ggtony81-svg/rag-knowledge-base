@@ -1,0 +1,43 @@
+{
+  "settings": {
+    "epochs": 2,
+    "train_subset": 1000,
+    "max_seq_length": 512,
+    "warmup_ratio": 0.1,
+    "seed": 42,
+    "note": "调参用训练集子集；最终模型仍用全量数据训练，两者的训练规模不同，论文中需注明。"
+  },
+  "runs": [
+    {
+      "tag": "lr2e-5",
+      "changed": "基线（学习率 2e-5，批大小 16）",
+      "lr": 2e-05,
+      "batch_size": 16,
+      "epochs_run": 1,
+      "smoke": true,
+      "train_pairs_used": 32,
+      "train_batches_per_epoch": 2,
+      "best_epoch": 1,
+      "best_val_loss": 1.368344,
+      "epochs": [
+        {
+          "epoch": 1,
+          "train_loss": 0.07256,
+          "val_loss": 1.368344,
+          "lr": 0.0
+        }
+      ],
+      "train_sec": 54.0,
+      "model_dir": "eval\\cache\\tune\\lr2e-5",
+      "metrics": {
+        "P@1": 0.9017,
+        "Recall@1": 0.9017,
+        "Recall@3": 0.9469,
+        "Recall@5": 0.9547,
+        "Recall@10": 0.9626,
+        "MRR@10": 0.925,
+        "nDCG@10": 0.9343
+      }
+    }
+  ]
+}

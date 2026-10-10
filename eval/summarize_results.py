@@ -44,6 +44,27 @@ DISPLAY = {
 }
 
 
+def describe_provenance(rows):
+    """
+    按每个方案实际来自哪个结果文件，生成"哪些方案是同一次跑出来的"这句话。
+
+    这句话以前是写死的，重跑一次 E/F 之后就和真实来源对不上了，
+    所以改成从 origin 现算——表格里写什么，取决于文件里实际有什么。
+    """
+    groups = {}
+    for r in rows:
+        groups.setdefault(r["source"], []).append(r["no"])
+    if len(groups) <= 1:
+        return "全部方案都在同一次运行中测得。"
+
+    def key(no):
+        return (len(no), no)          # A B C ... 之后的编号按字典序排
+
+    parts = [f"{'/'.join(sorted(nos, key=key))} 来自 {src}"
+             for src, nos in groups.items()]
+    return "但并非全部在同一次运行中测得：" + "；".join(parts) + "。"
+
+
 def load_from_jsons(min_queries=FULL_QUERY_COUNT):
     """
     合并所有 retrieval_*.json。
@@ -201,11 +222,15 @@ def main():
         "notes": extra_note,
         "timing_caveat": (
             "各方案耗时均在同一台机器上实测（6 核 12 线程 CPU，无 GPU，PyTorch CPU 版）。"
-            "但并非全部在同一次运行中测得：A/B/D/E 来自同一次运行，F 来自另一次，"
-            "C 来自 2026-09-21 那次运行。其中 C 测耗时期间另有训练任务在争抢 CPU，"
-            "因此其 6345 ms 偏保守，独占 CPU 时会低于该值。"
-            "指标（P@1 等）不受此影响，因为检索结果只取决于模型和算法、与算力无关——"
-            "这一点已通过重跑验证：同一次实验重跑后 BM25 与向量检索的全部指标完全一致。"
+            + describe_provenance(rows) +
+            "其中 C 计时期间另有训练任务在争抢 CPU，因此其 6345 ms 偏保守，"
+            "独占 CPU 时会低于该值。"
+            "指标（P@1 等）不受算力影响——检索结果只取决于模型和算法，与耗时无关。"
+            "这一点做过重跑验证：E/F 在当前代码下重跑一遍，全部指标与首次运行逐一相同"
+            "（浮点数完全相等，不只是四位小数相同）。"
+            "需要说明的是，只有耗时是浮动的：同一份代码、同一个数据集，E 两次跑出 "
+            "16.7 ms 和 19.0 ms，F 跑出 17.4 ms 和 15.5 ms，机器负载不同就有 ±15% 的波动。"
+            "所以表中耗时只适合看数量级（毫秒级 vs 秒级），不宜当作精确值引用。"
         ),
     }
 

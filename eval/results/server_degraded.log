@@ -1,0 +1,81 @@
+加载 embedding 模型: D:\shuqi\eval\cache\finetuned_model
+Loading weights:   0%|          | 0/71 [00:00<?, ?it/s]Loading weights: 100%|██████████| 71/71 [00:00<00:00, 7757.11it/s]
+模型就绪
+Redis 就绪
+MySQL 就绪
+加载知识库: test_handbook.pdf (24 块)
+== PDF 问答优化版启动 ==
+   embedding 模型: finetuned_model
+   向量检索 + 知识库持久化
+== http://127.0.0.1:18005 ==
+INFO:     Started server process [18552]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:18005 (Press CTRL+C to quit)
+INFO:     127.0.0.1:14561 - "GET /status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8889 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8901 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8911 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8921 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3196 - "GET /status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3200 - "GET /status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3204 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3205 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3214 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3226 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3237 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3252 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3261 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3262 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3263 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3264 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3265 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3276 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3286 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3299 - "POST /upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3300 - "POST /upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3301 - "GET /kb/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3304 - "GET /status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3308 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3322 - "GET /status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3326 - "GET /status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3330 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3331 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3340 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3351 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3362 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3374 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3383 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3384 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3385 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3386 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3387 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3397 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:3407 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8748 - "POST /upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8749 - "POST /upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8750 - "GET /kb/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8753 - "GET /status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:8756 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13036 - "GET /status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13040 - "GET /status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13041 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13042 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13047 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13053 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13058 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13062 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13067 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13072 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13078 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13079 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13080 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13081 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13082 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13087 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13092 - "POST /ask/v2 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13097 - "POST /upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13098 - "POST /upload HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13099 - "GET /kb/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:13101 - "GET /status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:6808 - "GET /status HTTP/1.1" 200 OK

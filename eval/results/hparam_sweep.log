@@ -1,0 +1,107 @@
+待跑 5 组：['lr1e-5', 'lr2e-5', 'lr5e-5', 'bs8', 'bs32']
+预计耗时约 125 分钟（CPU，无 GPU）
+
+D:\shuqi\eval\tune_hyperparams.py:127: DeprecationWarning: Importing from 'sentence_transformers.losses' is deprecated and will be removed in a future version. Please use 'sentence_transformers.sentence_transformer.losses' instead.
+  from sentence_transformers import SentenceTransformer, losses
+  使用 8 个线程（留出核心给正在运行的服务，截图不会太卡）
+==============================================================================
+[lr1e-5] 学习率 1e-5
+==============================================================================
+Loading weights:   0%|          | 0/71 [00:00<?, ?it/s]Loading weights: 100%|██████████| 71/71 [00:00<00:00, 4838.04it/s]
+  训练子集 1000 句对 -> 62 批/轮，共 2 轮
+  验证集   437 句对 -> 27 批
+  超参数   lr=1e-05 batch=16 warmup=0.1
+    epoch1 批次 50  loss=0.1194  lr=5.97e-06
+  epoch 1: train_loss=0.1174  val_loss=1.3562
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00, 19.72it/s]
+    epoch2 批次 50  loss=0.0559  lr=9.68e-07
+  epoch 2: train_loss=0.0604  val_loss=1.3549
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00, 20.40it/s]
+  训练完成，最优 epoch=2 验证损失=1.3549，耗时 15.7 分钟
+  正在评测检索效果 ...
+  检索 P@1 = 0.9034  nDCG@10 = 0.9379
+  已写入 D:\shuqi\eval\results\hparam_sweep.json
+
+  使用 8 个线程（留出核心给正在运行的服务，截图不会太卡）
+==============================================================================
+[lr2e-5] 基线（学习率 2e-5，批大小 16）
+==============================================================================
+Loading weights:   0%|          | 0/71 [00:00<?, ?it/s]Loading weights: 100%|██████████| 71/71 [00:00<00:00, 4021.38it/s]
+  训练子集 1000 句对 -> 62 批/轮，共 2 轮
+  验证集   437 句对 -> 27 批
+  超参数   lr=2e-05 batch=16 warmup=0.1
+    epoch1 批次 50  loss=0.1050  lr=1.19e-05
+  epoch 1: train_loss=0.1035  val_loss=1.3512
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00, 17.71it/s]
+    epoch2 批次 50  loss=0.0335  lr=1.94e-06
+  epoch 2: train_loss=0.0376  val_loss=1.3515
+  训练完成，最优 epoch=1 验证损失=1.3512，耗时 16.9 分钟
+  正在评测检索效果 ...
+  检索 P@1 = 0.9008  nDCG@10 = 0.9353
+  已写入 D:\shuqi\eval\results\hparam_sweep.json
+
+  使用 8 个线程（留出核心给正在运行的服务，截图不会太卡）
+==============================================================================
+[lr5e-5] 学习率 5e-5
+==============================================================================
+Loading weights:   0%|          | 0/71 [00:00<?, ?it/s]Loading weights: 100%|██████████| 71/71 [00:00<00:00, 3449.50it/s]
+  训练子集 1000 句对 -> 62 批/轮，共 2 轮
+  验证集   437 句对 -> 27 批
+  超参数   lr=5e-05 batch=16 warmup=0.1
+    epoch1 批次 50  loss=0.0967  lr=2.98e-05
+  epoch 1: train_loss=0.0960  val_loss=1.3462
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00, 11.23it/s]
+    epoch2 批次 50  loss=0.0150  lr=4.84e-06
+  epoch 2: train_loss=0.0161  val_loss=1.3498
+  训练完成，最优 epoch=1 验证损失=1.3462，耗时 17.0 分钟
+  正在评测检索效果 ...
+  检索 P@1 = 0.8973  nDCG@10 = 0.9317
+  已写入 D:\shuqi\eval\results\hparam_sweep.json
+
+  使用 8 个线程（留出核心给正在运行的服务，截图不会太卡）
+==============================================================================
+[bs8] 批大小 8
+==============================================================================
+Loading weights:   0%|          | 0/71 [00:00<?, ?it/s]Loading weights: 100%|██████████| 71/71 [00:00<00:00, 3411.41it/s]
+  训练子集 1000 句对 -> 125 批/轮，共 2 轮
+  验证集   437 句对 -> 54 批
+  超参数   lr=2e-05 batch=8 warmup=0.1
+    epoch1 批次 50  loss=0.0523  lr=1.60e-05
+    epoch1 批次 100  loss=0.0554  lr=1.20e-05
+  epoch 1: train_loss=0.0553  val_loss=1.1835
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00, 12.83it/s]
+    epoch2 批次 50  loss=0.0114  lr=6.00e-06
+    epoch2 批次 100  loss=0.0140  lr=2.00e-06
+  epoch 2: train_loss=0.0172  val_loss=1.1828
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00, 10.11it/s]
+  训练完成，最优 epoch=2 验证损失=1.1828，耗时 17.0 分钟
+  正在评测检索效果 ...
+  检索 P@1 = 0.9008  nDCG@10 = 0.9344
+  已写入 D:\shuqi\eval\results\hparam_sweep.json
+
+  使用 8 个线程（留出核心给正在运行的服务，截图不会太卡）
+==============================================================================
+[bs32] 批大小 32
+==============================================================================
+Loading weights:   0%|          | 0/71 [00:00<?, ?it/s]Loading weights: 100%|██████████| 71/71 [00:00<00:00, 4453.48it/s]
+  训练子集 1000 句对 -> 31 批/轮，共 2 轮
+  验证集   437 句对 -> 13 批
+  超参数   lr=2e-05 batch=32 warmup=0.1
+  epoch 1: train_loss=0.1890  val_loss=1.4604
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00,  3.75it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00,  3.72it/s]
+  epoch 2: train_loss=0.0853  val_loss=1.4553
+Writing model shards:   0%|          | 0/1 [00:00<?, ?it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00,  8.84it/s]Writing model shards: 100%|██████████| 1/1 [00:00<00:00,  8.82it/s]
+  训练完成，最优 epoch=2 验证损失=1.4553，耗时 15.0 分钟
+  正在评测检索效果 ...
+  检索 P@1 = 0.9034  nDCG@10 = 0.9367
+  已写入 D:\shuqi\eval\results\hparam_sweep.json
+
+==============================================================================
+汇总
+==============================================================================
+配置              lr  batch    最佳轮       验证损失     检索P@1   nDCG@10
+lr1e-5       1e-05     16      2     1.3549    0.9034    0.9379
+lr2e-5       2e-05     16      1     1.3512    0.9008    0.9353
+lr5e-5       5e-05     16      1     1.3462    0.8973    0.9317
+bs8          2e-05      8      2     1.1828    0.9008    0.9344
+bs32         2e-05     32      2     1.4553    0.9034    0.9367
